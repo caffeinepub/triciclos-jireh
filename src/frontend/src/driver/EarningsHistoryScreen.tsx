@@ -68,7 +68,7 @@ export default function EarningsHistoryScreen({ mode }: Props) {
       ? tripsData.filter((t) => t.status === TripStatus.completed)
       : DEMO_TRIPS;
 
-  const totalEarnings = trips.reduce((sum, t) => sum + t.price * 0.85, 0);
+  const totalEarnings = trips.reduce((sum, t) => sum + t.price * 0.9, 0);
 
   return (
     <div
@@ -90,7 +90,7 @@ export default function EarningsHistoryScreen({ mode }: Props) {
             {Math.round(totalEarnings).toLocaleString()} CUP
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            85% del precio del viaje
+            90% del precio del viaje (admin recibe 10%)
           </p>
         </div>
       )}
@@ -122,7 +122,7 @@ export default function EarningsHistoryScreen({ mode }: Props) {
                   )}
                 >
                   {mode === "earnings"
-                    ? `${Math.round(trip.price * 0.85).toLocaleString()} CUP`
+                    ? `${Math.round(trip.price * 0.9).toLocaleString()} CUP`
                     : `${trip.price.toLocaleString()} CUP`}
                 </span>
               </div>

@@ -9,6 +9,16 @@ import LoginScreen from "./screens/LoginScreen";
 
 type AppRole = "client" | "driver" | "admin" | null;
 
+// Handle hash-based role routing on first load
+const hash = window.location.hash;
+if (hash === "#/admin") {
+  localStorage.setItem("demoRole", "admin");
+} else if (hash === "#/cliente") {
+  localStorage.setItem("demoRole", "client");
+} else if (hash === "#/conductor") {
+  localStorage.setItem("demoRole", "driver");
+}
+
 export default function App() {
   const { identity, isInitializing } = useInternetIdentity();
   const { actor, isFetching } = useActor();
