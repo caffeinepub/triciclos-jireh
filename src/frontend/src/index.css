@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans.woff2") format("woff2");
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Figtree";
+  src: url("/assets/fonts/Figtree.woff2") format("woff2");
+  font-weight: 300 900;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --radius: 0.75rem;
+    --background: 0.975 0 0;
+    --foreground: 0.15 0.01 22;
+    --card: 1 0 0;
+    --card-foreground: 0.15 0.01 22;
+    --popover: 1 0 0;
+    --popover-foreground: 0.15 0.01 22;
+    --primary: 0.45 0.19 22;
+    --primary-foreground: 1 0 0;
+    --secondary: 0.94 0 0;
+    --secondary-foreground: 0.25 0.01 22;
+    --muted: 0.94 0 0;
+    --muted-foreground: 0.55 0 0;
+    --accent: 0.46 0.15 148;
+    --accent-foreground: 1 0 0;
+    --destructive: 0.45 0.19 22;
+    --destructive-foreground: 1 0 0;
+    --border: 0.9 0 0;
+    --input: 0.9 0 0;
+    --ring: 0.45 0.19 22;
+    --chart-1: 0.45 0.19 22;
+    --chart-2: 0.46 0.15 148;
+    --chart-3: 0.6 0.12 200;
+    --chart-4: 0.7 0.14 60;
+    --chart-5: 0.55 0.18 290;
+    --sidebar: 0.2 0.04 22;
+    --sidebar-foreground: 0.97 0 0;
+    --sidebar-primary: 0.45 0.19 22;
+    --sidebar-primary-foreground: 1 0 0;
+    --sidebar-accent: 0.3 0.05 22;
+    --sidebar-accent-foreground: 0.97 0 0;
+    --sidebar-border: 0.35 0.04 22;
+    --sidebar-ring: 0.45 0.19 22;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Figtree", system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
