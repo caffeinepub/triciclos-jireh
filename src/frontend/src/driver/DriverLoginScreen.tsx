@@ -1,7 +1,7 @@
 import { Eye, EyeOff, Lock, Truck } from "lucide-react";
 import { useState } from "react";
 
-const DRIVER_CODE = "CONDUCTOR2025";
+const DRIVER_CODE = "Conductor2025";
 
 interface DriverLoginScreenProps {
   onSuccess: () => void;
