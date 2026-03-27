@@ -10,61 +10,7 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { TripStatus } from "../backend.d";
-import type { Trip } from "../backend.d";
 import { useAllTrips } from "../hooks/useQueries";
-
-const DEMO_TRIPS: Trip[] = [
-  {
-    id: BigInt(1),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Habana Vieja",
-    destination: "Vedado",
-    price: 2800,
-    status: TripStatus.completed,
-    createdAt: BigInt(Date.now() - 3600000),
-  },
-  {
-    id: BigInt(2),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Terminal de Trenes",
-    destination: "Hospital Calixto García",
-    price: 1500,
-    status: TripStatus.inProgress,
-    createdAt: BigInt(Date.now() - 1800000),
-  },
-  {
-    id: BigInt(3),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Centro Habana",
-    destination: "Aeropuerto José Martí",
-    price: 4500,
-    status: TripStatus.pending,
-    createdAt: BigInt(Date.now() - 600000),
-  },
-  {
-    id: BigInt(4),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Universidad de La Habana",
-    destination: "Miramar",
-    price: 1200,
-    status: TripStatus.cancelled,
-    createdAt: BigInt(Date.now() - 7200000),
-  },
-  {
-    id: BigInt(5),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Playa",
-    destination: "Plaza de la Revolución",
-    price: 3500,
-    status: TripStatus.accepted,
-    createdAt: BigInt(Date.now() - 900000),
-  },
-];
 
 const statusConfig: Record<
   string,
@@ -98,12 +44,12 @@ const FILTER_LABELS: Record<string, string> = {
 };
 
 export default function AdminTripsScreen() {
-  const { data: tripsData } = useAllTrips();
-  const trips = tripsData && tripsData.length > 0 ? tripsData : DEMO_TRIPS;
+  const { data: trips } = useAllTrips();
   const [filter, setFilter] = useState<string>("all");
 
+  const allTrips = trips ?? [];
   const filtered =
-    filter === "all" ? trips : trips.filter((t) => t.status === filter);
+    filter === "all" ? allTrips : allTrips.filter((t) => t.status === filter);
 
   return (
     <div className="space-y-4" data-ocid="admin.trips.section">

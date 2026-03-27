@@ -1,61 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Clock, MapPin, Navigation } from "lucide-react";
 import { TripStatus } from "../backend.d";
-import type { Trip } from "../backend.d";
 import { useDriverTrips } from "../hooks/useQueries";
-
-const DEMO_TRIPS: Trip[] = [
-  {
-    id: BigInt(1),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Habana Vieja",
-    destination: "Vedado, Calle 23",
-    price: 2800,
-    status: TripStatus.completed,
-    createdAt: BigInt(Date.now() - 3600000),
-  },
-  {
-    id: BigInt(2),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Mercado Cuatro Caminos",
-    destination: "Hospital Calixto García",
-    price: 1600,
-    status: TripStatus.completed,
-    createdAt: BigInt(Date.now() - 7200000),
-  },
-  {
-    id: BigInt(3),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Centro Habana",
-    destination: "Aeropuerto José Martí",
-    price: 5000,
-    status: TripStatus.completed,
-    createdAt: BigInt(Date.now() - 86400000),
-  },
-  {
-    id: BigInt(4),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Universidad de La Habana",
-    destination: "Miramar",
-    price: 1200,
-    status: TripStatus.completed,
-    createdAt: BigInt(Date.now() - 172800000),
-  },
-  {
-    id: BigInt(5),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Terminal de Trenes",
-    destination: "Playa Baracoa",
-    price: 2000,
-    status: TripStatus.completed,
-    createdAt: BigInt(Date.now() - 259200000),
-  },
-];
 
 interface Props {
   mode: "trips" | "earnings";
@@ -63,10 +9,9 @@ interface Props {
 
 export default function EarningsHistoryScreen({ mode }: Props) {
   const { data: tripsData } = useDriverTrips();
-  const trips =
-    tripsData && tripsData.length > 0
-      ? tripsData.filter((t) => t.status === TripStatus.completed)
-      : DEMO_TRIPS;
+  const trips = tripsData
+    ? tripsData.filter((t) => t.status === TripStatus.completed)
+    : [];
 
   const totalEarnings = trips.reduce((sum, t) => sum + t.price * 0.9, 0);
 

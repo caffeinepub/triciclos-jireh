@@ -1,15 +1,16 @@
 import { Toaster } from "@/components/ui/sonner";
 import { useEffect, useState } from "react";
 import AdminApp from "./admin/AdminApp";
+import AdminLoginScreen from "./admin/AdminLoginScreen";
 import ClientApp from "./client/ClientApp";
 import DriverApp from "./driver/DriverApp";
+import DriverLoginScreen from "./driver/DriverLoginScreen";
 import { useActor } from "./hooks/useActor";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import LoginScreen from "./screens/LoginScreen";
 
 type AppRole = "client" | "driver" | "admin" | null;
 
-// Handle hash-based role routing on first load
 const hash = window.location.hash;
 if (hash === "#/admin") {
   localStorage.setItem("demoRole", "admin");
@@ -24,6 +25,12 @@ export default function App() {
   const { actor, isFetching } = useActor();
   const [role, setRole] = useState<AppRole>(null);
   const [roleLoading, setRoleLoading] = useState(false);
+  const [adminAuthorized, setAdminAuthorized] = useState(
+    () => sessionStorage.getItem("adminAuthorized") === "true",
+  );
+  const [driverAuthorized, setDriverAuthorized] = useState(
+    () => sessionStorage.getItem("driverAuthorized") === "true",
+  );
 
   const demoRole = localStorage.getItem("demoRole") as AppRole | null;
 
@@ -31,7 +38,6 @@ export default function App() {
     if (demoRole) return;
     if (!actor || isFetching) return;
     if (!identity) return;
-
     setRoleLoading(true);
     actor
       .getCallerUserRole()
@@ -60,6 +66,24 @@ export default function App() {
     return (
       <>
         <LoginScreen />
+        <Toaster />
+      </>
+    );
+  }
+
+  if (effectiveRole === "admin" && !adminAuthorized) {
+    return (
+      <>
+        <AdminLoginScreen onSuccess={() => setAdminAuthorized(true)} />
+        <Toaster />
+      </>
+    );
+  }
+
+  if (effectiveRole === "driver" && !driverAuthorized) {
+    return (
+      <>
+        <DriverLoginScreen onSuccess={() => setDriverAuthorized(true)} />
         <Toaster />
       </>
     );

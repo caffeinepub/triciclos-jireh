@@ -3,6 +3,8 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import {
   CheckCircle,
+  Loader2,
+  LocateFixed,
   MapPin,
   Navigation,
   Package,
@@ -11,10 +13,11 @@ import {
   Users,
   XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { TripStatus } from "../backend.d";
 import type { Trip } from "../backend.d";
+import TileMap from "../components/TileMap";
 import {
   useAcceptTrip,
   useAllTrips,
@@ -22,50 +25,101 @@ import {
   useUpdateDriverProfile,
 } from "../hooks/useQueries";
 
-const DEMO_REQUESTS: Trip[] = [
-  {
-    id: BigInt(10),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Habana Vieja - Obispo",
-    destination: "Vedado, Calle 23",
-    price: 2000,
-    status: TripStatus.pending,
-    createdAt: BigInt(Date.now() - 120000),
-  },
-  {
-    id: BigInt(11),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Terminal de Ómnibus",
-    destination: "Hospital Hermanos Ameijeiras",
-    price: 1600,
-    status: TripStatus.pending,
-    createdAt: BigInt(Date.now() - 300000),
-  },
-  {
-    id: BigInt(12),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Miramar, 5ta Avenida",
-    destination: "Aeropuerto José Martí",
-    price: 4500,
-    status: TripStatus.pending,
-    createdAt: BigInt(Date.now() - 60000),
-  },
-];
+const HAVANA_CENTER: [number, number] = [23.1136, -82.3666];
+
+async function reverseGeocode(lat: number, lon: number): Promise<string> {
+  try {
+    const params = new URLSearchParams({
+      format: "json",
+      lat: lat.toString(),
+      lon: lon.toString(),
+      zoom: "16",
+      addressdetails: "0",
+    });
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?${params}`,
+      { headers: { "Accept-Language": "es" } },
+    );
+    if (!res.ok) return `Mi ubicación (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+    const data = await res.json();
+    return (
+      data.display_name ?? `Mi ubicación (${lat.toFixed(4)}, ${lon.toFixed(4)})`
+    );
+  } catch {
+    return `Mi ubicación (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
+  }
+}
 
 export default function DriverDashboard() {
   const [available, setAvailable] = useState(true);
+  const [driverCoords, setDriverCoords] = useState<[number, number] | null>(
+    null,
+  );
+  const [driverAddress, setDriverAddress] = useState("");
+  const [mapCenter, setMapCenter] = useState<[number, number]>(HAVANA_CENTER);
+  const [gpsLoading, setGpsLoading] = useState(false);
+
   const { data: tripsData } = useAllTrips();
   const acceptTrip = useAcceptTrip();
   const cancelTrip = useCancelTrip();
   const updateProfile = useUpdateDriverProfile();
 
-  const pendingTrips =
-    tripsData && tripsData.length > 0
-      ? tripsData.filter((t) => t.status === TripStatus.pending)
-      : DEMO_REQUESTS;
+  const pendingTrips = tripsData
+    ? tripsData.filter((t) => t.status === TripStatus.pending)
+    : [];
+
+  // Auto-detect GPS on mount
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const coords: [number, number] = [lat, lon];
+        setDriverCoords(coords);
+        setMapCenter(coords);
+        const address = await reverseGeocode(lat, lon);
+        setDriverAddress(address);
+        setGpsLoading(false);
+        toast.success("Ubicación GPS detectada");
+      },
+      () => {
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }, []);
+
+  const handleUseGPS = () => {
+    if (!navigator.geolocation) {
+      toast.error("GPS no disponible en este dispositivo");
+      return;
+    }
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const coords: [number, number] = [lat, lon];
+        setDriverCoords(coords);
+        setMapCenter(coords);
+        const address = await reverseGeocode(lat, lon);
+        setDriverAddress(address);
+        setGpsLoading(false);
+        toast.success("Ubicación GPS actualizada");
+      },
+      (err) => {
+        setGpsLoading(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          toast.error("Permiso de GPS denegado. Actívalo en tu navegador.");
+        } else {
+          toast.error("No se pudo obtener la ubicación GPS");
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  };
 
   const handleToggleAvailability = (val: boolean) => {
     setAvailable(val);
@@ -85,6 +139,16 @@ export default function DriverDashboard() {
       onError: () => toast.error("Error al rechazar"),
     });
   };
+
+  const mapMarkers = [
+    {
+      id: "driver",
+      position: driverCoords ?? mapCenter,
+      color: "#D32F2F",
+      label: "\u{1F6B2}",
+      popupText: "Tu ubicación",
+    },
+  ];
 
   return (
     <div
@@ -113,18 +177,62 @@ export default function DriverDashboard() {
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-card rounded-2xl shadow-card p-3 text-center">
             <TrendingUp className="w-5 h-5 text-primary mx-auto mb-1" />
-            <p className="text-lg font-bold text-foreground">14 500</p>
+            <p className="text-lg font-bold text-foreground">0</p>
             <p className="text-xs text-muted-foreground">Hoy (CUP)</p>
           </div>
           <div className="bg-card rounded-2xl shadow-card p-3 text-center">
             <Star className="w-5 h-5 text-yellow-400 mx-auto mb-1" />
-            <p className="text-lg font-bold text-foreground">4.8</p>
+            <p className="text-lg font-bold text-foreground">--</p>
             <p className="text-xs text-muted-foreground">Rating</p>
           </div>
           <div className="bg-card rounded-2xl shadow-card p-3 text-center">
             <CheckCircle className="w-5 h-5 text-accent mx-auto mb-1" />
-            <p className="text-lg font-bold text-foreground">127</p>
+            <p className="text-lg font-bold text-foreground">0</p>
             <p className="text-xs text-muted-foreground">Viajes</p>
+          </div>
+        </div>
+
+        {/* GPS Location Card */}
+        <div className="bg-card rounded-2xl shadow-card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-primary" />
+              <span className="text-sm font-semibold text-foreground">
+                Tu ubicación
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleUseGPS}
+              disabled={gpsLoading}
+              data-ocid="driver.gps.button"
+              className={cn(
+                "flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border transition-all",
+                driverCoords
+                  ? "bg-green-600 text-white border-green-600"
+                  : "border-border text-muted-foreground hover:border-green-600 hover:text-green-600",
+              )}
+            >
+              {gpsLoading ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <LocateFixed className="w-3 h-3" />
+              )}
+              GPS
+            </button>
+          </div>
+          {driverAddress && (
+            <p className="text-xs text-muted-foreground line-clamp-2">
+              {driverAddress}
+            </p>
+          )}
+          <div className="rounded-xl overflow-hidden">
+            <TileMap
+              center={mapCenter}
+              zoom={14}
+              height={200}
+              markers={mapMarkers}
+            />
           </div>
         </div>
 

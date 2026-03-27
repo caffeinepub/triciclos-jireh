@@ -7,68 +7,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Star } from "lucide-react";
-import type { Rating } from "../backend.d";
 import { useAllRatings } from "../hooks/useQueries";
-
-const DEMO_RATINGS: Rating[] = [
-  {
-    id: BigInt(1),
-    tripId: BigInt(1),
-    clientId: {} as any,
-    driverId: {} as any,
-    score: BigInt(5),
-    comment: "Excelente servicio, muy puntual!",
-    createdAt: BigInt(Date.now() - 3600000),
-  },
-  {
-    id: BigInt(2),
-    tripId: BigInt(2),
-    clientId: {} as any,
-    driverId: {} as any,
-    score: BigInt(4),
-    comment: "Buen conductor, conoce bien las rutas",
-    createdAt: BigInt(Date.now() - 7200000),
-  },
-  {
-    id: BigInt(3),
-    tripId: BigInt(3),
-    clientId: {} as any,
-    driverId: {} as any,
-    score: BigInt(5),
-    comment: "Super recomendado, triciclo muy limpio",
-    createdAt: BigInt(Date.now() - 86400000),
-  },
-  {
-    id: BigInt(4),
-    tripId: BigInt(4),
-    clientId: {} as any,
-    driverId: {} as any,
-    score: BigInt(3),
-    comment: "Llegó un poco tarde pero el servicio estuvo bien",
-    createdAt: BigInt(Date.now() - 172800000),
-  },
-  {
-    id: BigInt(5),
-    tripId: BigInt(5),
-    clientId: {} as any,
-    driverId: {} as any,
-    score: BigInt(5),
-    comment: "Perfecto! Lo usaré de nuevo",
-    createdAt: BigInt(Date.now() - 259200000),
-  },
-];
 
 export default function AdminRatingsScreen() {
   const { data: ratingsData } = useAllRatings();
-  const ratings =
-    ratingsData && ratingsData.length > 0 ? ratingsData : DEMO_RATINGS;
+  const ratings = ratingsData ?? [];
 
   const avgScore =
     ratings.length > 0
       ? (
           ratings.reduce((sum, r) => sum + Number(r.score), 0) / ratings.length
         ).toFixed(1)
-      : "4.7";
+      : "0.0";
 
   return (
     <div className="space-y-4" data-ocid="admin.ratings.section">
@@ -97,26 +47,38 @@ export default function AdminRatingsScreen() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {ratings.map((r) => (
-              <TableRow key={r.id.toString()} data-ocid="admin.ratings.row">
-                <TableCell className="text-sm font-mono">
-                  #{r.tripId.toString()}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: Number(r.score) }, (_, j) => (
-                      <Star
-                        key={`star-${r.id.toString()}-${j}`}
-                        className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400"
-                      />
-                    ))}
-                  </div>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground max-w-48 truncate">
-                  {r.comment}
+            {ratings.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={3}
+                  className="text-center text-muted-foreground py-8"
+                  data-ocid="admin.ratings.empty_state"
+                >
+                  No hay calificaciones aún
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              ratings.map((r) => (
+                <TableRow key={r.id.toString()} data-ocid="admin.ratings.row">
+                  <TableCell className="text-sm font-mono">
+                    #{r.tripId.toString()}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-0.5">
+                      {Array.from({ length: Number(r.score) }, (_, j) => (
+                        <Star
+                          key={`star-${r.id.toString()}-${j}`}
+                          className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400"
+                        />
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground max-w-48 truncate">
+                    {r.comment}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

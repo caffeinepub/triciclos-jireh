@@ -13,49 +13,6 @@ import { TripStatus } from "../backend.d";
 import type { Trip } from "../backend.d";
 import { useClientTrips, useSubmitRating } from "../hooks/useQueries";
 
-const DEMO_TRIPS: Trip[] = [
-  {
-    id: BigInt(1),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Habana Vieja, Obispo",
-    destination: "Mercado Cuatro Caminos",
-    price: 1200,
-    status: TripStatus.completed,
-    createdAt: BigInt(Date.now() - 86400000),
-  },
-  {
-    id: BigInt(2),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Centro Habana",
-    destination: "Universidad de La Habana",
-    price: 2000,
-    status: TripStatus.completed,
-    createdAt: BigInt(Date.now() - 172800000),
-  },
-  {
-    id: BigInt(3),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Vedado",
-    destination: "Aeropuerto José Martí",
-    price: 4000,
-    status: TripStatus.cancelled,
-    createdAt: BigInt(Date.now() - 259200000),
-  },
-  {
-    id: BigInt(4),
-    client: {} as any,
-    driver: {} as any,
-    origin: "Miramar",
-    destination: "Plaza de la Revolución",
-    price: 2500,
-    status: TripStatus.inProgress,
-    createdAt: BigInt(Date.now() - 3600000),
-  },
-];
-
 const statusConfig: Record<string, { label: string; className: string }> = {
   completed: { label: "Completado", className: "bg-green-100 text-green-700" },
   pending: { label: "Pendiente", className: "bg-yellow-100 text-yellow-700" },
@@ -66,7 +23,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 
 export default function TripHistoryScreen() {
   const { data: tripsData } = useClientTrips();
-  const trips = tripsData && tripsData.length > 0 ? tripsData : DEMO_TRIPS;
+  const trips = tripsData ?? [];
   const [ratingTrip, setRatingTrip] = useState<Trip | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");

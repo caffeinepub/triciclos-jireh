@@ -7,29 +7,6 @@ import {
   useRevenueSummary,
 } from "../hooks/useQueries";
 
-const recentActivity = [
-  {
-    text: "Carlos Mendez aceptó viaje a Vedado",
-    time: "hace 5 min",
-    dot: "bg-accent",
-  },
-  {
-    text: "Nuevo usuario registrado: Ana García",
-    time: "hace 12 min",
-    dot: "bg-blue-500",
-  },
-  {
-    text: "Viaje completado: Habana Vieja → Aeropuerto",
-    time: "hace 23 min",
-    dot: "bg-primary",
-  },
-  {
-    text: "Calificación 5⭐ recibida por Maria Lopez",
-    time: "hace 1 hora",
-    dot: "bg-yellow-500",
-  },
-];
-
 export default function AdminDashboard() {
   const { data: trips } = useAllTrips();
   const { data: users } = useAllUsers();
@@ -40,16 +17,16 @@ export default function AdminDashboard() {
     trips?.filter(
       (t) =>
         t.status === TripStatus.inProgress || t.status === TripStatus.accepted,
-    ).length ?? 3;
-  const totalUsers = users?.length ?? 48;
-  const totalRevenue = revenue ?? 1285000;
-  const totalRatings = ratings?.length ?? 142;
+    ).length ?? 0;
+  const totalUsers = users?.length ?? 0;
+  const totalRevenue = revenue ?? 0;
+  const totalRatings = ratings?.length ?? 0;
   const avgRating =
     ratings && ratings.length > 0
       ? (
           ratings.reduce((sum, r) => sum + Number(r.score), 0) / ratings.length
         ).toFixed(1)
-      : "4.7";
+      : "0.0";
 
   const stats = [
     {
@@ -68,7 +45,7 @@ export default function AdminDashboard() {
     },
     {
       label: "Ingresos (CUP)",
-      value: `${totalRevenue.toLocaleString()} CUP`,
+      value: `${Math.round(totalRevenue).toLocaleString()} CUP`,
       Icon: Wallet,
       colorClass: "text-accent",
       bgClass: "bg-accent/5",
@@ -107,18 +84,8 @@ export default function AdminDashboard() {
           <TrendingUp className="w-5 h-5 text-primary" />
           <h2 className="font-semibold text-foreground">Actividad Reciente</h2>
         </div>
-        <div className="space-y-3">
-          {recentActivity.map(({ text, time, dot }) => (
-            <div key={text} className="flex items-start gap-3">
-              <div
-                className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${dot}`}
-              />
-              <div className="flex-1">
-                <p className="text-sm text-foreground">{text}</p>
-                <p className="text-xs text-muted-foreground">{time}</p>
-              </div>
-            </div>
-          ))}
+        <div className="text-center py-8 text-muted-foreground text-sm">
+          No hay actividad reciente
         </div>
       </div>
     </div>
